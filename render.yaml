@@ -1,0 +1,40 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Set secrets in the Render dashboard: DATABASE_URL, JWT_SECRET, and match URLs to your service names.
+
+databases: []
+
+services:
+  - type: web
+    name: hemolink-api
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npx prisma migrate deploy && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      # Your STATIC SITE origin(s) — e.g. https://hemolink-kwrt.onrender.com
+      - key: CORS_ORIGIN
+        sync: false
+
+staticSites:
+  - name: hemolink-web
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # REQUIRED: your Web Service API base URL (no /api suffix, no trailing slash)
+      # Example: https://hemolink-api.onrender.com
+      - key: VITE_API_URL
+        sync: false

@@ -9,11 +9,21 @@ import { hospitalRouter } from "./routes/hospitalRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { notFound } from "./middlewares/notFound.js";
 
+function corsOrigins(): boolean | string[] {
+  const raw = process.env.CORS_ORIGIN?.trim();
+  if (!raw) return true;
+  const list = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return list.length > 0 ? list : true;
+}
+
 export function createApp() {
   const app = express();
   app.use(
     cors({
-      origin: process.env.CORS_ORIGIN?.split(",") ?? true,
+      origin: corsOrigins(),
     })
   );
   app.use(express.json());
